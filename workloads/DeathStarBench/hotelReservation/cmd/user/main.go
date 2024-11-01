@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"gopkg.in/mgo.v2"
 
 	pb "github.com/harlow/go-micro-services/services/user/proto"
+
 	"github.com/harlow/go-micro-services/services/user"
 	"github.com/harlow/go-micro-services/utils"
+
 	"cs.utexas.edu/zjia/faas"
 	"cs.utexas.edu/zjia/faas/types"
 
+	"gopkg.in/mgo.v2"
 	// "github.com/bradfitz/gomemcache/memcache"
 )
 
@@ -35,7 +37,6 @@ func (f *funcHandlerFactory) GrpcNew(env types.Environment, service string) (typ
 	}
 	return utils.NewGrpcFuncHandler(srv, pb.UserMethods)
 }
-
 
 func main() {
 	// initializeDatabase()

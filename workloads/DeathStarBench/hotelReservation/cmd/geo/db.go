@@ -1,12 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"log"
-	"strconv"
-	"fmt"
 	"os"
+	"strconv"
 )
 
 type point struct {
@@ -33,7 +33,7 @@ func initializeDatabase(url string) *mgo.Session {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if count == 0{
+	if count == 0 {
 		err = c.Insert(&point{"1", 37.7867, -122.4112})
 		if err != nil {
 			log.Fatal(err)
@@ -44,7 +44,7 @@ func initializeDatabase(url string) *mgo.Session {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if count == 0{
+	if count == 0 {
 		err = c.Insert(&point{"2", 37.7854, -122.4005})
 		if err != nil {
 			log.Fatal(err)
@@ -55,7 +55,7 @@ func initializeDatabase(url string) *mgo.Session {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if count == 0{
+	if count == 0 {
 		err = c.Insert(&point{"3", 37.7854, -122.4071})
 		if err != nil {
 			log.Fatal(err)
@@ -66,7 +66,7 @@ func initializeDatabase(url string) *mgo.Session {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if count == 0{
+	if count == 0 {
 		err = c.Insert(&point{"4", 37.7936, -122.3930})
 		if err != nil {
 			log.Fatal(err)
@@ -77,7 +77,7 @@ func initializeDatabase(url string) *mgo.Session {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if count == 0{
+	if count == 0 {
 		err = c.Insert(&point{"5", 37.7831, -122.4181})
 		if err != nil {
 			log.Fatal(err)
@@ -88,7 +88,7 @@ func initializeDatabase(url string) *mgo.Session {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if count == 0{
+	if count == 0 {
 		err = c.Insert(&point{"6", 37.7863, -122.4015})
 		if err != nil {
 			log.Fatal(err)
@@ -102,9 +102,9 @@ func initializeDatabase(url string) *mgo.Session {
 		if err != nil {
 			log.Fatal(err)
 		}
-		lat := 37.7835 + float64(i)/500.0 * 3
-		lon := -122.41 + float64(i)/500.0 * 4
-		if count == 0{
+		lat := 37.7835 + float64(i)/500.0*3
+		lon := -122.41 + float64(i)/500.0*4
+		if count == 0 {
 			err = c.Insert(&point{hotel_id, lat, lon})
 			if err != nil {
 				log.Fatal(err)
@@ -116,7 +116,6 @@ func initializeDatabase(url string) *mgo.Session {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 
 	return session
 }

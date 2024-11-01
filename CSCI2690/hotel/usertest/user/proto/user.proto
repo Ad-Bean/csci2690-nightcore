@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package user;
+
+service User {
+  // CheckUser returns whether the username and password are correct
+  rpc CheckUser(Request) returns (Result);
+  // GetUserByUsername returns the username and password for a given username
+  rpc GetUserByUsername(Request) returns (Request);
+}
+
+message Request {
+  string username = 1;
+  string password = 2;
+}
+
+message Result {
+  bool correct = 1;
+}

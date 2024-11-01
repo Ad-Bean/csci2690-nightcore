@@ -1,5 +1,5 @@
-FROM zjia/nightcore:asplos-ae as nightcore
-FROM golang:1.14-buster as builder
+FROM zjia/nightcore:asplos-ae AS nightcore
+FROM golang:1.14-buster AS builder
 
 COPY ./hotelReservation /hotelReservation
 COPY --from=nightcore /src/nightcore /src/nightcore

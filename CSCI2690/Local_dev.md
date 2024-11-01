@@ -1,6 +1,6 @@
 ## Docker Compose
 
-run the following in one of the `./experiments`, like `./experiments/hotelresv_singlenode` 
+run the following in one of the `./experiments`, like `./experiments/hotelresv_singlenode`
 
 ```bash
 sudo rm -rf /tmp/nightcore_config.json
@@ -18,6 +18,12 @@ sudo cp /tmp/nightcore_config.json /mnt/inmem/nightcore/func_config.json
 docker-compose up
 ```
 
+engine cpu:
+
+```bash
+ENGINE_CONTAINER_ID=$(docker inspect --format='{{.Id}}' $(docker ps -q -f name="nightcore-engine"))
+echo 4096 | sudo tee /sys/fs/cgroup/cpu/docker/$ENGINE_CONTAINER_ID/cpu.shares
+```
 
 ## wrk1 benchmark
 
@@ -25,3 +31,9 @@ docker-compose up
 wrk -t5 -c55 -d5 --latency "http://localhost:8080/function/user?username=Cornell_1&password=1111111111"
 ```
 
+## Git
+
+```bash
+git submodule update --remote
+git submodule update --init --recursive
+```

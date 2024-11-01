@@ -1,12 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"strconv"
-	"log"
-	"fmt"
-	"os"
 )
 
 type User struct {
@@ -32,29 +33,29 @@ func initializeDatabase(url string) *mgo.Session {
 	for i := 0; i <= 10000; i++ {
 		suffix := strconv.Itoa(i)
 		user_name := "Cornell_" + suffix
-		password  := ""
+		password := ""
 		for j := 0; j < 10; j++ {
 			password += suffix
 		}
+
+		fmt.Printf("user_name = %s, password = %s\n", user_name, password)
 
 		count, err := c.Find(&bson.M{"username": user_name}).Count()
 		if err != nil {
 			log.Fatal(err)
 		}
-		if count == 0{
+		if count == 0 {
 			err = c.Insert(&User{user_name, password})
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
-
 	}
 
 	err = c.EnsureIndexKey("username")
 	if err != nil {
 		log.Fatal(err)
 	}
-
 
 	return session
 
