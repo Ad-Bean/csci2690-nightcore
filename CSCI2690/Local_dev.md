@@ -1,23 +1,3 @@
-## Docker Compose
-
-run the following in one of the `./experiments`, like `./experiments/hotelresv_singlenode`
-
-```bash
-sudo rm -rf /tmp/nightcore_config.json
-sudo rm -rf /tmp/run_launcher
-sudo rm -rf /mnt/inmem/nightcore
-sudo mkdir -p /mnt/inmem/nightcore
-sudo mkdir -p /mnt/inmem/nightcore/output /mnt/inmem/nightcore/ipc
-
-cp ./nightcore_config.json /tmp/nightcore_config.json
-cp ./run_launcher /tmp/run_launcher
-sudo cp /tmp/run_launcher /mnt/inmem/nightcore/run_launcher
-sudo cp /tmp/nightcore_config.json /mnt/inmem/nightcore/func_config.json
-
-
-docker-compose up
-```
-
 ## Docker Image
 
 Hotel Reservation:
@@ -43,7 +23,29 @@ recommendation:
     - FAAS_GO_MAX_PROC_FACTOR=8
 ```
 
+## Docker Compose
+
+run the following in one of the `./experiments`, like `./experiments/hotelresv_singlenode`
+
+```bash
+sudo rm -rf /tmp/nightcore_config.json
+sudo rm -rf /tmp/run_launcher
+sudo rm -rf /mnt/inmem/nightcore
+sudo mkdir -p /mnt/inmem/nightcore
+sudo mkdir -p /mnt/inmem/nightcore/output /mnt/inmem/nightcore/ipc
+
+cp ./nightcore_config.json /tmp/nightcore_config.json
+cp ./run_launcher /tmp/run_launcher
+sudo cp /tmp/run_launcher /mnt/inmem/nightcore/run_launcher
+sudo cp /tmp/nightcore_config.json /mnt/inmem/nightcore/func_config.json
+
+
+docker-compose up
+```
+
 ## Engine cpu
+
+if you need to enlarge the cpu share of engine:
 
 ```bash
 ENGINE_CONTAINER_ID=$(docker inspect --format='{{.Id}}' $(docker ps -q -f name="nightcore-engine"))
