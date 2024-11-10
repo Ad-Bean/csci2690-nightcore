@@ -18,6 +18,14 @@ sudo cp /tmp/nightcore_config.json /mnt/inmem/nightcore/func_config.json
 docker-compose up
 ```
 
+## Docker Image
+
+Hotel Reservation:
+
+```bash
+docker build -f ./dockerfiles/Dockerfile.hotelresv -t nightcore-hotel ./workloads/DeathStarBench
+```
+
 ## Env
 
 in `docker-compose.yaml`, change the env `SWARM_TASK_SLOT=1`
