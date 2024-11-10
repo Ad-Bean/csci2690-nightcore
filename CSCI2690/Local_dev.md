@@ -18,7 +18,24 @@ sudo cp /tmp/nightcore_config.json /mnt/inmem/nightcore/func_config.json
 docker-compose up
 ```
 
-engine cpu:
+## Env
+
+in `docker-compose.yaml`, change the env `SWARM_TASK_SLOT=1`
+
+for example:
+
+```yaml
+recommendation:
+  image: nightcore-hotel:latest
+  entrypoint: ['/tmp/nightcore/run_launcher', 'recommendation', '8']
+  volumes:
+    - /mnt/inmem/nightcore:/tmp/nightcore
+  environment:
+    - SWARM_TASK_SLOT=1
+    - FAAS_GO_MAX_PROC_FACTOR=8
+```
+
+## Engine cpu
 
 ```bash
 ENGINE_CONTAINER_ID=$(docker inspect --format='{{.Id}}' $(docker ps -q -f name="nightcore-engine"))

@@ -1,7 +1,6 @@
 package user
 
 import (
-	"strconv"
 
 	// "encoding/json"
 	"context"
@@ -89,31 +88,13 @@ func (s *Server) loadUsers() {
 	// 	// fmt.Printf("Username: %s, Password: %s\n", user.Username, user.Password)
 	// }
 
-	fmt.Printf("Done load users\n")
 	s.users = make(map[string]string)
-	for i := 0; i <= 10000; i++ {
-		suffix := strconv.Itoa(i)
-		user_name := "Cornell_" + suffix
-		password := ""
-		for j := 0; j < 10; j++ {
-			password += suffix
-		}
-
-		// fmt.Printf("user_name = %s, password = %s\n", user_name, password)
-		s.users[user_name] = password
-
-		count, err := c.Find(&bson.M{"username": user_name}).Count()
-		if err != nil {
-			log.Fatal(err)
-		}
-		if count == 0 {
-			err = c.Insert(&User{user_name, password})
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
+	// fmt.Printf("Done load users\n")
+	for _, user := range users {
+		s.users[user.Username] = user.Password
+		// fmt.Printf("Username: %s, Password: %s\n", user.Username, user.Password)
 	}
-
+	fmt.Printf("done loading: %v\n", len(s.users))
 	fmt.Printf("Done load users again again\n")
 }
 

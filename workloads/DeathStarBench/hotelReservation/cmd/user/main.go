@@ -52,7 +52,11 @@ func main() {
 	var result map[string]string
 	json.Unmarshal([]byte(byteValue), &result)
 
-	mongo_session := initializeDatabase(result["UserMongoAddress"])
+	mongo_session, err := initializeDatabase(result["UserMongoAddress"])
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
 	defer mongo_session.Close()
 
 	faas.Serve(&funcHandlerFactory{mongoSession: mongo_session})

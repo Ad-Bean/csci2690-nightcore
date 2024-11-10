@@ -15,7 +15,7 @@ type User struct {
 	Password string `bson:"password"`
 }
 
-func initializeDatabase(url string) *mgo.Session {
+func initializeDatabase(url string) (*mgo.Session, error) {
 	fmt.Printf("user db ip addr = %s\n", url)
 	session, err := mgo.Dial(url)
 	if err != nil {
@@ -25,7 +25,7 @@ func initializeDatabase(url string) *mgo.Session {
 
 	swarmTaskSlot := os.Getenv("SWARM_TASK_SLOT")
 	if swarmTaskSlot != "" && swarmTaskSlot != "1" {
-		return session
+		return session, nil
 	}
 
 	c := session.DB("user-db").C("user")
@@ -38,26 +38,27 @@ func initializeDatabase(url string) *mgo.Session {
 			password += suffix
 		}
 
-		fmt.Printf("user_name = %s, password = %s\n", user_name, password)
+		// fmt.Printf("user_name = %s, password = %s\n", user_name, password)
 
 		count, err := c.Find(&bson.M{"username": user_name}).Count()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("find user %s failed: %v\n", user_name, err)
 		}
 		if count == 0 {
 			err = c.Insert(&User{user_name, password})
 			if err != nil {
-				log.Fatal(err)
+				log.Fatalf("insert user %s failed: %v\n", user_name, err)
+				return nil, err
 			}
 		}
 	}
 
 	err = c.EnsureIndexKey("username")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("ensure index key failed: %v\n", err)
 	}
 
-	return session
+	return session, nil
 
 	// count, err := c.Find(&bson.M{"username": "Cornell"}).Count()
 	// if err != nil {
