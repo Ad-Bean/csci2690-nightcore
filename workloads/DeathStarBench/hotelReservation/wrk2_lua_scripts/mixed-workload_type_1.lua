@@ -126,6 +126,7 @@ request = function()
   end
 end
 
-function init(rand_seed)
+function init()
+  rand_seed = os.time()
   math.randomseed(rand_seed)
 end
