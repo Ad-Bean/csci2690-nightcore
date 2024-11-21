@@ -58,6 +58,12 @@ echo 4096 | sudo tee /sys/fs/cgroup/cpu/docker/$ENGINE_CONTAINER_ID/cpu.shares
 wrk -t5 -c55 -d5 --latency "http://localhost:8080/function/user?username=Cornell_1&password=1111111111"
 ```
 
+script
+
+```bash
+wrk -t 4 -c 64 -d 150 -L -U -s ./mixed-workload_type_1.lua http://localhost:8080 -R 100
+```
+
 ## Git
 
 ```bash

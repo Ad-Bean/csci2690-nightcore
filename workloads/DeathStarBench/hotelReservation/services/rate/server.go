@@ -3,26 +3,29 @@ package rate
 import (
 	"encoding/json"
 	"fmt"
+
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+
 	// "io/ioutil"
 	// "log"
 	// "os"
-	"sort"
 	"context"
+	"sort"
 
+	"github.com/go-redis/redis/v8"
 	pb "github.com/harlow/go-micro-services/services/rate/proto"
 
-	"github.com/bradfitz/gomemcache/memcache"
 	"strings"
 )
 
-const name = "srv-rate"
+// const name = "srv-rate"
 
 // Server implements the rate service
 type Server struct {
-	MongoSession 	*mgo.Session
-	MemcClient *memcache.Client
+	MongoSession *mgo.Session
+	// MemcClient *memcache.Client
+	RedisClient *redis.Client
 }
 
 // Run starts the server
@@ -45,29 +48,23 @@ func (s *Server) GetRates(ctx context.Context, req *pb.Request) (*pb.Result, err
 	defer session.Close()
 
 	for _, hotelID := range req.HotelIds {
-		// first check memcached
-		item, err := s.MemcClient.Get(hotelID)
+		// first check redis
+		item, err := s.RedisClient.Get(ctx, hotelID).Result()
 		if err == nil {
-			// memcached hit
-			rate_strs := strings.Split(string(item.Value), "\n")
-
-			// fmt.Printf("memc hit, hotelId = %s\n", hotelID)
-			// fmt.Println(rate_strs)
+			// redis hit
+			rate_strs := strings.Split(item, "\n")
 
 			for _, rate_str := range rate_strs {
 				if len(rate_str) != 0 {
 					rate_p := new(pb.RatePlan)
-					json.Unmarshal(item.Value, rate_p)
+					json.Unmarshal([]byte(rate_str), rate_p)
 					ratePlans = append(ratePlans, rate_p)
 				}
 			}
-		} else if err == memcache.ErrCacheMiss {
-
-			// fmt.Printf("memc miss, hotelId = %s\n", hotelID)
-
-			// memcached miss, set up mongo connection
+		} else if err == redis.Nil {
+			// redis miss, set up mongo connection
 			c := session.DB("rate-db").C("inventory")
-
+			// log.Println("REDIS miss: hotelID = ", hotelID)
 			memc_str := ""
 
 			tmpRatePlans := make(RatePlans, 0)
@@ -77,7 +74,7 @@ func (s *Server) GetRates(ctx context.Context, req *pb.Request) (*pb.Result, err
 			} else {
 				for _, r := range tmpRatePlans {
 					ratePlans = append(ratePlans, r)
-					rate_json , err := json.Marshal(r)
+					rate_json, err := json.Marshal(r)
 					if err != nil {
 						fmt.Printf("json.Marshal err = %s\n", err)
 					}
@@ -85,11 +82,11 @@ func (s *Server) GetRates(ctx context.Context, req *pb.Request) (*pb.Result, err
 				}
 			}
 
-			// write to memcached
-			s.MemcClient.Set(&memcache.Item{Key: hotelID, Value: []byte(memc_str)})
+			// write to redis
+			s.RedisClient.Set(ctx, hotelID, memc_str, 0)
 
 		} else {
-			fmt.Printf("Memmcached error = %s\n", err)
+			fmt.Printf("Redis error = %s\n", err)
 			panic(err)
 		}
 	}

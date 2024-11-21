@@ -1,29 +1,25 @@
 package reservation
 
 import (
-	// "encoding/json"
-	"fmt"
 	"context"
+	"fmt"
+
+	"github.com/go-redis/redis/v8"
 	pb "github.com/harlow/go-micro-services/services/reservation/proto"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	// "io/ioutil"
-	// "os"
-	"time"
-	// "log"
 
-	"github.com/bradfitz/gomemcache/memcache"
-	// "strings"
 	"strconv"
+	"time"
 )
 
-const name = "srv-reservation"
+// const name = "srv-reservation"
 
 // Server implements the user service
 type Server struct {
-	MongoSession	*mgo.Session
-	MemcClient *memcache.Client
+	MongoSession *mgo.Session
+	RedisClient  *redis.Client
 }
 
 // Run starts the server
@@ -36,11 +32,6 @@ func (s *Server) MakeReservation(ctx context.Context, req *pb.Request) (*pb.Resu
 	res := new(pb.Result)
 	res.HotelId = make([]string, 0)
 
-	// session, err := mgo.Dial("mongodb-reservation")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer session.Close()
 	session := s.MongoSession.Copy()
 	defer session.Close()
 
@@ -49,91 +40,75 @@ func (s *Server) MakeReservation(ctx context.Context, req *pb.Request) (*pb.Resu
 
 	inDate, _ := time.Parse(
 		time.RFC3339,
-		req.InDate + "T12:00:00+00:00")
+		req.InDate+"T12:00:00+00:00")
 
 	outDate, _ := time.Parse(
 		time.RFC3339,
-		req.OutDate + "T12:00:00+00:00")
+		req.OutDate+"T12:00:00+00:00")
 	hotelId := req.HotelId[0]
 
 	indate := inDate.String()[0:10]
 
-	memc_date_num_map := make(map[string] int)
+	redis_date_num_map := make(map[string]int)
 
 	for inDate.Before(outDate) {
-		// check reservations
 		count := 0
 		inDate = inDate.AddDate(0, 0, 1)
 		outdate := inDate.String()[0:10]
 
-		// first check memc
-		memc_key := hotelId + "_" + inDate.String()[0:10] + "_" + outdate
-		item, err := s.MemcClient.Get(memc_key)
+		redis_key := hotelId + "_" + inDate.String()[0:10] + "_" + outdate
+		val, err := s.RedisClient.Get(ctx, redis_key).Result()
 		if err == nil {
-			// memcached hit
-			count, _ = strconv.Atoi(string(item.Value))
-			// fmt.Printf("memcached hit %s = %d\n", memc_key, count)
-			memc_date_num_map[memc_key] = count + int(req.RoomNumber)
-
-		} else if err == memcache.ErrCacheMiss {
-			// memcached miss
-			// fmt.Printf("memcached miss\n")
+			count, _ = strconv.Atoi(val)
+			redis_date_num_map[redis_key] = count + int(req.RoomNumber)
+		} else if err == redis.Nil {
 			reserve := make([]reservation, 0)
 			err := c.Find(&bson.M{"hotelId": hotelId, "inDate": indate, "outDate": outdate}).All(&reserve)
 			if err != nil {
 				panic(err)
 			}
-			
+
 			for _, r := range reserve {
 				count += r.Number
 			}
 
-			memc_date_num_map[memc_key] = count + int(req.RoomNumber)
-
+			redis_date_num_map[redis_key] = count + int(req.RoomNumber)
 		} else {
-			fmt.Printf("Memmcached error = %s\n", err)
+			fmt.Printf("Redis error = %s\n", err)
 			panic(err)
 		}
-		
-		// check capacity
-		// check memc capacity
-		memc_cap_key := hotelId + "_cap"
-		item, err = s.MemcClient.Get(memc_cap_key)
+
+		redis_cap_key := hotelId + "_cap"
+		val, err = s.RedisClient.Get(ctx, redis_cap_key).Result()
 		hotel_cap := 0
 		if err == nil {
-			// memcached hit
-			hotel_cap, _ = strconv.Atoi(string(item.Value))
-			// fmt.Printf("memcached hit %s = %d\n", memc_cap_key, hotel_cap)
-		} else if err == memcache.ErrCacheMiss {
-			// memcached miss
+			hotel_cap, _ = strconv.Atoi(val)
+		} else if err == redis.Nil {
 			var num number
 			err = c1.Find(&bson.M{"hotelId": hotelId}).One(&num)
 			if err != nil {
 				panic(err)
 			}
 			hotel_cap = int(num.Number)
-
-			// write to memcache
-			s.MemcClient.Set(&memcache.Item{Key: memc_cap_key, Value: []byte(strconv.Itoa(hotel_cap))})
+			s.RedisClient.Set(ctx, redis_cap_key, strconv.Itoa(hotel_cap), 0)
 		} else {
-			fmt.Printf("Memmcached error = %s\n", err)
+			fmt.Printf("Redis error = %s\n", err)
 			panic(err)
 		}
 
-		if count + int(req.RoomNumber) > hotel_cap {
+		if count+int(req.RoomNumber) > hotel_cap {
 			return res, nil
 		}
 		indate = outdate
 	}
 
-	// only update reservation number cache after check succeeds
-	for key, val := range memc_date_num_map {
-		s.MemcClient.Set(&memcache.Item{Key: key, Value: []byte(strconv.Itoa(val))})
+	for key, val := range redis_date_num_map {
+		s.RedisClient.Set(ctx, key, strconv.Itoa(val), 0)
 	}
 
 	inDate, _ = time.Parse(
 		time.RFC3339,
-		req.InDate + "T12:00:00+00:00")
+		req.InDate+"T12:00:00+00:00")
 
 	indate = inDate.String()[0:10]
 
@@ -145,7 +120,7 @@ func (s *Server) MakeReservation(ctx context.Context, req *pb.Request) (*pb.Resu
 			CustomerName: req.CustomerName,
 			InDate:       indate,
 			OutDate:      outdate,
-			Number:       int(req.RoomNumber),})
+			Number:       int(req.RoomNumber)})
 		if err != nil {
 			panic(err)
 		}
@@ -162,11 +137,6 @@ func (s *Server) CheckAvailability(ctx context.Context, req *pb.Request) (*pb.Re
 	res := new(pb.Result)
 	res.HotelId = make([]string, 0)
 
-	// session, err := mgo.Dial("mongodb-reservation")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer session.Close()
 	session := s.MongoSession.Copy()
 	defer session.Close()
 
@@ -174,76 +144,64 @@ func (s *Server) CheckAvailability(ctx context.Context, req *pb.Request) (*pb.Re
 	c1 := session.DB("reservation-db").C("number")
 
 	for _, hotelId := range req.HotelId {
-		// fmt.Printf("reservation check hotel %s\n", hotelId)
 		inDate, _ := time.Parse(
 			time.RFC3339,
-			req.InDate + "T12:00:00+00:00")
+			req.InDate+"T12:00:00+00:00")
 
 		outDate, _ := time.Parse(
 			time.RFC3339,
-			req.OutDate + "T12:00:00+00:00")
+			req.OutDate+"T12:00:00+00:00")
 
 		indate := inDate.String()[0:10]
 
 		for inDate.Before(outDate) {
-			// check reservations
 			count := 0
 			inDate = inDate.AddDate(0, 0, 1)
-			// fmt.Printf("reservation check date %s\n", inDate.String()[0:10])
 			outdate := inDate.String()[0:10]
 
-			// first check memc
-			memc_key := hotelId + "_" + inDate.String()[0:10] + "_" + outdate
-			item, err := s.MemcClient.Get(memc_key)
+			redis_key := hotelId + "_" + inDate.String()[0:10] + "_" + outdate
+			val, err := s.RedisClient.Get(ctx, redis_key).Result()
 
 			if err == nil {
-				// memcached hit
-				count, _ = strconv.Atoi(string(item.Value))
-				// fmt.Printf("memcached hit %s = %d\n", memc_key, count)
-			} else if err == memcache.ErrCacheMiss {
-				// memcached miss
+				count, _ = strconv.Atoi(val)
+			} else if err == redis.Nil {
+				// log.Println("REDIS miss: reservation = ", redis_key)
+
 				reserve := make([]reservation, 0)
 				err := c.Find(&bson.M{"hotelId": hotelId, "inDate": indate, "outDate": outdate}).All(&reserve)
 				if err != nil {
 					panic(err)
 				}
 				for _, r := range reserve {
-					// fmt.Printf("reservation check reservation number = %d\n", hotelId)
 					count += r.Number
 				}
-
-				// update memcached
-				s.MemcClient.Set(&memcache.Item{Key: memc_key, Value: []byte(strconv.Itoa(count))})
+				s.RedisClient.Set(ctx, redis_key, strconv.Itoa(count), 0)
 			} else {
-				fmt.Printf("Memmcached error = %s\n", err)
+				fmt.Printf("Redis error = %s\n", err)
 				panic(err)
 			}
 
-			// check capacity
-			// check memc capacity
-			memc_cap_key := hotelId + "_cap"
-			item, err = s.MemcClient.Get(memc_cap_key)
+			redis_cap_key := hotelId + "_cap"
+			val, err = s.RedisClient.Get(ctx, redis_cap_key).Result()
 			hotel_cap := 0
 
 			if err == nil {
-				// memcached hit
-				hotel_cap, _ = strconv.Atoi(string(item.Value))
-				// fmt.Printf("memcached hit %s = %d\n", memc_cap_key, hotel_cap)
-			} else if err == memcache.ErrCacheMiss { 
+				hotel_cap, _ = strconv.Atoi(val)
+			} else if err == redis.Nil {
 				var num number
+				// log.Println("REDIS miss: reservation hotelId = ", hotelId)
 				err = c1.Find(&bson.M{"hotelId": hotelId}).One(&num)
 				if err != nil {
 					panic(err)
 				}
 				hotel_cap = int(num.Number)
-				// update memcached
-				s.MemcClient.Set(&memcache.Item{Key: memc_cap_key, Value: []byte(strconv.Itoa(hotel_cap))})
+				s.RedisClient.Set(ctx, redis_cap_key, strconv.Itoa(hotel_cap), 0)
 			} else {
-				fmt.Printf("Memmcached error = %s\n", err)
+				fmt.Printf("Redis error = %s\n", err)
 				panic(err)
 			}
 
-			if count + int(req.RoomNumber) > hotel_cap {
+			if count+int(req.RoomNumber) > hotel_cap {
 				break
 			}
 			indate = outdate
@@ -266,6 +224,6 @@ type reservation struct {
 }
 
 type number struct {
-	HotelId      string `bson:"hotelId"`
-	Number       int    `bson:"numberOfRoom"`
+	HotelId string `bson:"hotelId"`
+	Number  int    `bson:"numberOfRoom"`
 }
