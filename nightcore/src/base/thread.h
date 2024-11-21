@@ -4,54 +4,54 @@
 #error base/thread.h cannot be included outside
 #endif
 
-#include "base/common.h"
 #include <pthread.h>
+#include "base/common.h"
 
 namespace faas {
-namespace base {
+  namespace base {
 
-class Thread {
-public:
-    Thread(std::string_view name, std::function<void()> fn)
-        : state_(kCreated), name_(std::string(name)), fn_(fn), tid_(-1) {}
+    class Thread {
+     public:
+      Thread(std::string_view name, std::function<void()> fn)
+          : state_(kCreated), name_(std::string(name)), fn_(fn), tid_(-1) {}
 
-    ~Thread() {
+      ~Thread() {
         State state = state_.load();
         DCHECK(state == kCreated || state == kFinished);
-    }
+      }
 
-    void Start();
-    void Join();
+      void Start();
+      void Join();
 
-    void MarkThreadCategory(absl::string_view category);
+      void MarkThreadCategory(absl::string_view category);
 
-    const char* name() const { return name_.c_str(); }
-    int tid() { return tid_; }
-    static Thread* current() {
+      const char* name() const { return name_.c_str(); }
+      int tid() { return tid_; }
+      static Thread* current() {
         DCHECK(current_ != nullptr);
         return current_;
-    }
+      }
 
-    static void RegisterMainThread();
+      static void RegisterMainThread();
 
-private:
-    enum State { kCreated, kStarting, kRunning, kFinished };
+     private:
+      enum State { kCreated, kStarting, kRunning, kFinished };
 
-    std::atomic<State> state_;
-    std::string name_;
-    std::function<void()> fn_;
-    int tid_;
+      std::atomic<State> state_;
+      std::string name_;
+      std::function<void()> fn_;
+      int tid_;
 
-    absl::Notification started_;
-    pthread_t pthread_;
+      absl::Notification started_;
+      pthread_t pthread_;
 
-    static thread_local Thread* current_;
+      static thread_local Thread* current_;
 
-    void Run();
-    static void* StartRoutine(void* arg);
+      void Run();
+      static void* StartRoutine(void* arg);
 
-    DISALLOW_COPY_AND_ASSIGN(Thread);
-};
+      DISALLOW_COPY_AND_ASSIGN(Thread);
+    };
 
-}  // namespace base
+  }  // namespace base
 }  // namespace faas
