@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"strconv"
-
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"strconv"
+	"log"
+	"fmt"
+	"os"
 )
 
 type User struct {
@@ -15,7 +14,7 @@ type User struct {
 	Password string `bson:"password"`
 }
 
-func initializeDatabase(url string) (*mgo.Session, error) {
+func initializeDatabase(url string) *mgo.Session {
 	fmt.Printf("user db ip addr = %s\n", url)
 	session, err := mgo.Dial(url)
 	if err != nil {
@@ -25,7 +24,7 @@ func initializeDatabase(url string) (*mgo.Session, error) {
 
 	swarmTaskSlot := os.Getenv("SWARM_TASK_SLOT")
 	if swarmTaskSlot != "" && swarmTaskSlot != "1" {
-		return session, nil
+		return session
 	}
 
 	c := session.DB("user-db").C("user")
@@ -33,32 +32,31 @@ func initializeDatabase(url string) (*mgo.Session, error) {
 	for i := 0; i <= 10000; i++ {
 		suffix := strconv.Itoa(i)
 		user_name := "Cornell_" + suffix
-		password := ""
+		password  := ""
 		for j := 0; j < 10; j++ {
 			password += suffix
 		}
 
-		// fmt.Printf("user_name = %s, password = %s\n", user_name, password)
-
 		count, err := c.Find(&bson.M{"username": user_name}).Count()
 		if err != nil {
-			log.Fatalf("find user %s failed: %v\n", user_name, err)
+			log.Fatal(err)
 		}
-		if count == 0 {
+		if count == 0{
 			err = c.Insert(&User{user_name, password})
 			if err != nil {
-				log.Fatalf("insert user %s failed: %v\n", user_name, err)
-				return nil, err
+				log.Fatal(err)
 			}
 		}
+
 	}
 
 	err = c.EnsureIndexKey("username")
 	if err != nil {
-		log.Fatalf("ensure index key failed: %v\n", err)
+		log.Fatal(err)
 	}
 
-	return session, nil
+
+	return session
 
 	// count, err := c.Find(&bson.M{"username": "Cornell"}).Count()
 	// if err != nil {

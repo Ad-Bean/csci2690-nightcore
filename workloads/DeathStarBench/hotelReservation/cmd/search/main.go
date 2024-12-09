@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	pb "github.com/harlow/go-micro-services/services/search/proto"
 	"github.com/harlow/go-micro-services/services/search"
+	pb "github.com/harlow/go-micro-services/services/search/proto"
 	"github.com/harlow/go-micro-services/utils"
-	"cs.utexas.edu/zjia/faas"
-	"cs.utexas.edu/zjia/faas/types"
+	faas "github.com/harlow/go-micro-services/worker"
+	"github.com/harlow/go-micro-services/worker/types"
 )
 
 type funcHandlerFactory struct {

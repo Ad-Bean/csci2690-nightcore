@@ -82,6 +82,7 @@
     "variant": "cpp",
     "multi_span": "cpp",
     "string_span": "cpp",
-    "*.inc": "cpp"
+    "*.inc": "cpp",
+    "gsl_util": "cpp"
   }
 }

@@ -6,11 +6,10 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/harlow/go-micro-services/worker/types"
 	"google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-
-	"cs.utexas.edu/zjia/faas/types"
 )
 
 type GrpcFuncHandlerWrapper struct {

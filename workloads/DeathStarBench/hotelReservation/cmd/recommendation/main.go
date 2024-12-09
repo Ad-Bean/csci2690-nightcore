@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
 	"gopkg.in/mgo.v2"
 
-	pb "github.com/harlow/go-micro-services/services/recommendation/proto"
 	"github.com/harlow/go-micro-services/services/recommendation"
+	pb "github.com/harlow/go-micro-services/services/recommendation/proto"
 	"github.com/harlow/go-micro-services/utils"
-	"cs.utexas.edu/zjia/faas"
-	"cs.utexas.edu/zjia/faas/types"
-
+	faas "github.com/harlow/go-micro-services/worker"
+	"github.com/harlow/go-micro-services/worker/types"
 	// "github.com/bradfitz/gomemcache/memcache"
 )
 

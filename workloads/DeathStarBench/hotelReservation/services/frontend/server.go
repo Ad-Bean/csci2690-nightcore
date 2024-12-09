@@ -1,18 +1,17 @@
 package frontend
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/harlow/go-micro-services/services/recommendation/proto"
+	"github.com/harlow/go-micro-services/services/reservation/proto"
+	"github.com/harlow/go-micro-services/services/user/proto"
 	"strconv"
-
-	recommendation "github.com/harlow/go-micro-services/services/recommendation/proto"
-	reservation "github.com/harlow/go-micro-services/services/reservation/proto"
-	user "github.com/harlow/go-micro-services/services/user/proto"
+	"context"
 	"google.golang.org/grpc"
 
-	profile "github.com/harlow/go-micro-services/services/profile/proto"
-	search "github.com/harlow/go-micro-services/services/search/proto"
+	"github.com/harlow/go-micro-services/services/profile/proto"
+	"github.com/harlow/go-micro-services/services/search/proto"
 )
 
 // Server implements frontend service
@@ -205,7 +204,7 @@ func (s *Server) userHandler(ctx context.Context, input map[string]string) (map[
 
 	str := "Login successfully!"
 	if recResp.Correct == false {
-		str = fmt.Sprintf("Login Failed. Please check your username and password. %s %s", username, password)
+		str = "Failed. Please check your username and password. "
 	}
 
 	res := map[string]interface{}{
@@ -265,7 +264,7 @@ func (s *Server) reservationHandler(ctx context.Context, input map[string]string
 
 	str := "Reserve successfully!"
 	if recResp.Correct == false {
-		str = "Reserve Failed. Please check your username and password. "
+		str = "Failed. Please check your username and password. "
 	}
 
 	// Make reservation

@@ -7,11 +7,11 @@ import (
 	"runtime"
 	"strconv"
 
-	config "cs.utexas.edu/zjia/faas/config"
-	ipc "cs.utexas.edu/zjia/faas/ipc"
-	protocol "cs.utexas.edu/zjia/faas/protocol"
-	types "cs.utexas.edu/zjia/faas/types"
-	worker "cs.utexas.edu/zjia/faas/worker"
+	config "github.com/harlow/go-micro-services/worker/config"
+	ipc "github.com/harlow/go-micro-services/worker/ipc"
+	protocol "github.com/harlow/go-micro-services/worker/protocol"
+	types "github.com/harlow/go-micro-services/worker/types"
+	worker "github.com/harlow/go-micro-services/worker/worker"
 )
 
 func Serve(factory types.FuncHandlerFactory) {
@@ -36,12 +36,18 @@ func Serve(factory types.FuncHandlerFactory) {
 	if err != nil || nread != len(payloadSizeBuf) {
 		log.Fatal("[FATAL] Failed to read payload size")
 	}
+
+	log.Printf("\n\n[INFO] FAAS_ROOT_PATH_FOR_IPC : %v\n\n", os.Getenv("FAAS_ROOT_PATH_FOR_IPC"))
+	log.Printf("\n\n[INFO] FAAS_MSG_PIPE_FD : %v\n\n", int(uintptr(msgPipeFd)))
+
 	payloadSize := binary.LittleEndian.Uint32(payloadSizeBuf)
 	payload := make([]byte, payloadSize)
 	nread, err = msgPipe.Read(payload)
 	if err != nil || nread != len(payload) {
 		log.Fatal("[FATAL] Failed to read payload")
 	}
+	log.Printf("\n\n[INFO] msgPipe read payload1: %s\n\n", payload)
+
 	err = config.InitFuncConfig(payload)
 	if err != nil {
 		log.Fatal("[FATAL] InitFuncConfig failed: %s", err)
@@ -66,6 +72,8 @@ func Serve(factory types.FuncHandlerFactory) {
 		if err != nil || nread != protocol.MessageFullByteSize {
 			log.Fatal("[FATAL] Failed to read launcher message")
 		}
+		log.Printf("\n\n[INFO] msgPipe read payload2: %s\n\n", payload)
+
 		if protocol.IsCreateFuncWorkerMessage(message) {
 			clientId := protocol.GetClientIdFromMessage(message)
 			w, err := worker.NewFuncWorker(uint16(funcId), clientId, factory)

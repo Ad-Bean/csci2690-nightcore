@@ -3,7 +3,7 @@ module github.com/harlow/go-micro-services
 go 1.14
 
 require (
-	cs.utexas.edu/zjia/faas v0.0.0
+	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/protobuf v1.5.2
 	github.com/hailocab/go-geoindex v0.0.0-20160127134810-64631bfe9711
@@ -14,6 +14,6 @@ require (
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 )
 
-replace cs.utexas.edu/zjia/faas => /src/nightcore/worker/golang
+// replace cs.utexas.edu/zjia/faas => /src/nightcore/worker/golang
 
-// replace cs.utexas.edu/zjia/faas => ./worker/golang
+// replace cs.utexas.edu/zjia/faas => github.com/harlow/go-micro-services/worker/golang

@@ -5,8 +5,8 @@ import (
 
 	"github.com/harlow/go-micro-services/services/frontend"
 	"github.com/harlow/go-micro-services/utils"
-	"cs.utexas.edu/zjia/faas"
-	"cs.utexas.edu/zjia/faas/types"
+	faas "github.com/harlow/go-micro-services/worker"
+	"github.com/harlow/go-micro-services/worker/types"
 )
 
 type funcHandlerFactory struct {

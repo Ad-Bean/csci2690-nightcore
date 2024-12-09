@@ -1,15 +1,13 @@
 package user
 
 import (
-
+	"crypto/sha256"
 	// "encoding/json"
-	"context"
 	"fmt"
-
+	"context"
 	pb "github.com/harlow/go-micro-services/services/user/proto"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-
 	// "io/ioutil"
 	"log"
 )
@@ -20,7 +18,7 @@ const name = "srv-user"
 type Server struct {
 	users map[string]string
 
-	MongoSession *mgo.Session
+	MongoSession 	*mgo.Session
 }
 
 // Run starts the server
@@ -31,15 +29,15 @@ func (s *Server) Init() error {
 // CheckUser returns whether the username and password are correct.
 func (s *Server) CheckUser(ctx context.Context, req *pb.Request) (*pb.Result, error) {
 	if s.users == nil {
-		s.loadUsers()
+		s.users = loadUsers(s.MongoSession)
 	}
 
 	res := new(pb.Result)
 
 	// fmt.Printf("CheckUser")
 
-	// sum := sha256.Sum256([]byte(req.Password))
-	// pass := fmt.Sprintf("%x", sum)
+	sum := sha256.Sum256([]byte(req.Password))
+	pass := fmt.Sprintf("%x", sum)
 
 	// session, err := mgo.Dial("mongodb-user")
 	// if err != nil {
@@ -56,10 +54,9 @@ func (s *Server) CheckUser(ctx context.Context, req *pb.Request) (*pb.Result, er
 	// }
 	res.Correct = false
 	if true_pass, found := s.users[req.Username]; found {
-		// res.Correct = pass == true_pass
-		res.Correct = req.Password == true_pass
+	    res.Correct = pass == true_pass
 	}
-
+	
 	// res.Correct = user.Password == pass
 
 	// fmt.Printf("CheckUser %d\n", res.Correct)
@@ -68,13 +65,15 @@ func (s *Server) CheckUser(ctx context.Context, req *pb.Request) (*pb.Result, er
 }
 
 // loadUsers loads hotel users from mongodb.
-func (s *Server) loadUsers() {
+func loadUsers(session *mgo.Session) map[string]string {
 	// session, err := mgo.Dial("mongodb-user")
 	// if err != nil {
 	// 	panic(err)
 	// }
 	// defer session.Close()
-	c := s.MongoSession.DB("user-db").C("user")
+	s := session.Copy()
+	defer s.Close()
+	c := s.DB("user-db").C("user")
 
 	// unmarshal json profiles
 	var users []User
@@ -83,19 +82,14 @@ func (s *Server) loadUsers() {
 		log.Println("Failed get users data: ", err)
 	}
 
-	// for _, user := range users {
-	// 	s.users[user.Username] = user.Password
-	// 	// fmt.Printf("Username: %s, Password: %s\n", user.Username, user.Password)
-	// }
-
-	s.users = make(map[string]string)
-	// fmt.Printf("Done load users\n")
+	res := make(map[string]string)
 	for _, user := range users {
-		s.users[user.Username] = user.Password
-		// fmt.Printf("Username: %s, Password: %s\n", user.Username, user.Password)
+		res[user.Username] = user.Password
 	}
-	fmt.Printf("done loading: %v\n", len(s.users))
-	fmt.Printf("Done load users again again\n")
+
+	fmt.Printf("Done load users\n")
+
+	return res
 }
 
 type User struct {

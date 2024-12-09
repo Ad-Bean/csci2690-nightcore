@@ -6,15 +6,13 @@ import (
 	"io/ioutil"
 	"os"
 
-	pb "github.com/harlow/go-micro-services/services/user/proto"
+	"gopkg.in/mgo.v2"
 
 	"github.com/harlow/go-micro-services/services/user"
+	pb "github.com/harlow/go-micro-services/services/user/proto"
 	"github.com/harlow/go-micro-services/utils"
-
-	"cs.utexas.edu/zjia/faas"
-	"cs.utexas.edu/zjia/faas/types"
-
-	"gopkg.in/mgo.v2"
+	faas "github.com/harlow/go-micro-services/worker"
+	"github.com/harlow/go-micro-services/worker/types"
 	// "github.com/bradfitz/gomemcache/memcache"
 )
 
@@ -52,11 +50,7 @@ func main() {
 	var result map[string]string
 	json.Unmarshal([]byte(byteValue), &result)
 
-	mongo_session, err := initializeDatabase(result["UserMongoAddress"])
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
-	}
+	mongo_session := initializeDatabase(result["UserMongoAddress"])
 	defer mongo_session.Close()
 
 	faas.Serve(&funcHandlerFactory{mongoSession: mongo_session})

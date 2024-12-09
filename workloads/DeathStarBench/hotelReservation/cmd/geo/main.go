@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
 	"gopkg.in/mgo.v2"
 
 	"github.com/harlow/go-micro-services/services/geo"
-	"github.com/harlow/go-micro-services/utils"
 	pb "github.com/harlow/go-micro-services/services/geo/proto"
-	"cs.utexas.edu/zjia/faas"
-	"cs.utexas.edu/zjia/faas/types"
+	"github.com/harlow/go-micro-services/utils"
+	faas "github.com/harlow/go-micro-services/worker"
+	"github.com/harlow/go-micro-services/worker/types"
 )
 
 type funcHandlerFactory struct {
@@ -35,7 +36,7 @@ func (f *funcHandlerFactory) GrpcNew(env types.Environment, service string) (typ
 }
 
 func main() {
-	
+
 	jsonFile, err := os.Open("config.json")
 	if err != nil {
 		fmt.Println(err)

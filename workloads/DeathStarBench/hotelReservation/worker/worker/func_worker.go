@@ -11,11 +11,11 @@ import (
 	"sync"
 	"sync/atomic"
 
-	common "cs.utexas.edu/zjia/faas/common"
-	config "cs.utexas.edu/zjia/faas/config"
-	ipc "cs.utexas.edu/zjia/faas/ipc"
-	protocol "cs.utexas.edu/zjia/faas/protocol"
-	types "cs.utexas.edu/zjia/faas/types"
+	common "github.com/harlow/go-micro-services/worker/common"
+	config "github.com/harlow/go-micro-services/worker/config"
+	ipc "github.com/harlow/go-micro-services/worker/ipc"
+	protocol "github.com/harlow/go-micro-services/worker/protocol"
+	types "github.com/harlow/go-micro-services/worker/types"
 )
 
 const PIPE_BUF = 4096
@@ -460,6 +460,9 @@ func (w *FuncWorker) GrpcCall(ctx context.Context, service string, method string
 	if methodId < 0 {
 		return nil, fmt.Errorf("Invalid gRPC method: %s", method)
 	}
+
+	// log.Printf("[INFO] GrpcCall: %s.%s", service, method)
+
 	funcCall := protocol.FuncCall{
 		FuncId:   entry.FuncId,
 		MethodId: uint16(methodId),
