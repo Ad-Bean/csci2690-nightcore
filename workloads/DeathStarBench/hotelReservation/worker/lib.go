@@ -39,6 +39,8 @@ func Serve(factory types.FuncHandlerFactory) {
 
 	log.Printf("\n\n[INFO] FAAS_ROOT_PATH_FOR_IPC : %v\n\n", os.Getenv("FAAS_ROOT_PATH_FOR_IPC"))
 	log.Printf("\n\n[INFO] FAAS_MSG_PIPE_FD : %v\n\n", int(uintptr(msgPipeFd)))
+	log.Printf("\n\n[INFO] FAAS_FUNC_ID : %v\n\n", funcId)
+	log.Printf("\n\n[INFO] FAAS_CLIENT_ID : %v\n\n", clientId)
 
 	payloadSize := binary.LittleEndian.Uint32(payloadSizeBuf)
 	payload := make([]byte, payloadSize)
@@ -80,6 +82,8 @@ func Serve(factory types.FuncHandlerFactory) {
 			if err != nil {
 				log.Fatal("[FATAL] Failed to create FuncWorker: ", err)
 			}
+			log.Printf("[INFO] Create new worker for client %d", clientId)
+
 			numWorkers += 1
 			planedMaxProcs := (numWorkers-1)/maxProcFactor + 1
 			currentMaxProcs := runtime.GOMAXPROCS(0)
