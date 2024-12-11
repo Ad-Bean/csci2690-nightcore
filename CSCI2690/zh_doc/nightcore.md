@@ -53,12 +53,12 @@ search 需要重写，使用 nightcore runtime / worker
 
 `FuncWorker.Run()`
 
-1. `doHandshake`
+1. `doHandshake()`
    1. 打开 unix socket 和 engine 通信
    2. 打开自己的 fifo 通信
    3. 写入 engine 表示当前调用，读取 engine 进行握手
    4. 通过 `entriesByFuncId` 寻找对应的配置和 FuncId
-   5. 如果是 gRPC 就创建 grpcHandler 工厂，否则只是普通 Handler
+   5. 如果是 gRPC 就创建 `grpcHandler` 工厂，否则只是普通 `Handler`
    6. 打开 FIFO 等待写入
 2. `go w.servingLoop()`
 3. 当前线程死循环读 fifo pipe
@@ -73,5 +73,8 @@ search 需要重写，使用 nightcore runtime / worker
 
 `workloads/DeathStarBench/hotelReservation/worker/worker/func_worker.go`
 
-1. 执行 `executeFunc` 一旦 `newFuncCallChan` channel 有消息
-2.
+1. `servingLoop()`
+   1. 一旦 `newFuncCallChan` channel 有消息 执行 `executeFunc` (newFuncCallChan 从 fifo input 收到的消息)
+   2. 执行 `executeFunc`
+   3. 从 fifo 拿出 `GetFuncCallFromMessage` `GetPayloadSizeFromMessage`
+   4. 打开 shm
