@@ -35,7 +35,7 @@ services:
       - /tmp/nightcore_config.json:/tmp/nightcore/func_config.json
 
   frontend-search:
-    image: nightcore-hotel:latest
+    image: zjia/nightcore-hotelresv:asplos-ae
     entrypoint: ['/tmp/nightcore/run_launcher', 'frontend', '1']
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
@@ -47,7 +47,7 @@ services:
     restart: always
 
   frontend-recommend:
-    image: nightcore-hotel:latest
+    image: zjia/nightcore-hotelresv:asplos-ae
     entrypoint: ['/tmp/nightcore/run_launcher', 'frontend', '2']
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
@@ -59,7 +59,7 @@ services:
     restart: always
 
   frontend-user:
-    image: nightcore-hotel:latest
+    image: zjia/nightcore-hotelresv:asplos-ae
     entrypoint: ['/tmp/nightcore/run_launcher', 'frontend', '3']
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
@@ -71,7 +71,7 @@ services:
     restart: always
 
   frontend-reservation:
-    image: nightcore-hotel:latest
+    image: zjia/nightcore-hotelresv:asplos-ae
     entrypoint: ['/tmp/nightcore/run_launcher', 'frontend', '4']
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
@@ -83,7 +83,7 @@ services:
     restart: always
 
   geo:
-    image: nightcore-hotel:latest
+    image: zjia/nightcore-hotelresv:asplos-ae
     entrypoint: ['/tmp/nightcore/run_launcher', 'geo', '5']
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
@@ -97,7 +97,7 @@ services:
     restart: always
 
   profile:
-    image: nightcore-hotel:latest
+    image: zjia/nightcore-hotelresv:asplos-ae
     entrypoint: ['/tmp/nightcore/run_launcher', 'profile', '6']
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
@@ -112,7 +112,7 @@ services:
     restart: always
 
   rate:
-    image: nightcore-hotel:latest
+    image: zjia/nightcore-hotelresv:asplos-ae
     entrypoint: ['/tmp/nightcore/run_launcher', 'rate', '7']
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
@@ -127,7 +127,7 @@ services:
     restart: always
 
   recommendation:
-    image: nightcore-hotel:latest
+    image: zjia/nightcore-hotelresv:asplos-ae
     entrypoint: ['/tmp/nightcore/run_launcher', 'recommendation', '8']
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
@@ -140,7 +140,7 @@ services:
       - mongodb-hotelresv
 
   reservation:
-    image: nightcore-hotel:latest
+    image: zjia/nightcore-hotelresv:asplos-ae
     entrypoint: ['/tmp/nightcore/run_launcher', 'reservation', '9']
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
@@ -154,7 +154,7 @@ services:
       - memcached-reserve
 
   search:
-    image: nightcore-hotel:latest
+    image: zjia/nightcore-hotelresv:asplos-ae
     entrypoint: ['/tmp/nightcore/run_launcher', 'search', '10']
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
@@ -166,7 +166,7 @@ services:
     restart: always
 
   user:
-    image: nightcore-hotel:latest
+    image: zjia/nightcore-hotelresv:asplos-ae
     entrypoint: ['/tmp/nightcore/run_launcher', 'user', '11']
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
