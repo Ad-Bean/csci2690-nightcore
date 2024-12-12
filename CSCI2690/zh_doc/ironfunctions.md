@@ -48,6 +48,11 @@ GET `/r/:app/*route` 调用 `server.handleRunnerRequest(c, s.Enqueue)`
 
 > TODO: 加入 grpc
 
+2. `RunAsyncRunner` 忽略
+3. `go runner.StartWorkers(ctx, s.Runner, s.tasks)`
+   1. 死循环 `hfcmgr.getPipe(ctx, rnr, task.Config)` 判断是否是 hotfn
+   2. 如果是 HTTP，将 stdin/stdout streams into HTTP/1.1 compliant `api/runner/protocol`
+
 ## handleRequest
 
 `api/server/runner.go`
@@ -63,6 +68,10 @@ GET `/r/:app/*route` 调用 `server.handleRunnerRequest(c, s.Enqueue)`
    Runner driver 驱动 docker 容器
    `Runner.Enqueue()`
    `runner.RunTask(s.tasks, ctx, cfg)`
+
+`AttachToContainerNonBlocking` 输入是通过 stdin 传入容器的
+
+`StartContainerWithContext`
 
 ## FN tools
 

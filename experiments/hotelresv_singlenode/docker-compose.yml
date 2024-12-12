@@ -88,7 +88,7 @@ services:
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
     environment:
-      - SWARM_TASK_SLOT=1
+      - SWARM_TASK_SLOT={{.Task.Slot}}
       - FAAS_GO_MAX_PROC_FACTOR=8
       - GOGC=1000
     depends_on:
@@ -102,7 +102,7 @@ services:
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
     environment:
-      - SWARM_TASK_SLOT=1
+      - SWARM_TASK_SLOT={{.Task.Slot}}
       - FAAS_GO_MAX_PROC_FACTOR=8
       - GOGC=1000
     depends_on:
@@ -117,7 +117,7 @@ services:
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
     environment:
-      - SWARM_TASK_SLOT=1
+      - SWARM_TASK_SLOT={{.Task.Slot}}
       - FAAS_GO_MAX_PROC_FACTOR=8
       - GOGC=1000
     depends_on:
@@ -132,7 +132,7 @@ services:
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
     environment:
-      - SWARM_TASK_SLOT=1
+      - SWARM_TASK_SLOT={{.Task.Slot}}
       - FAAS_GO_MAX_PROC_FACTOR=8
       - GOGC=1000
     depends_on:
@@ -145,7 +145,7 @@ services:
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
     environment:
-      - SWARM_TASK_SLOT=1
+      - SWARM_TASK_SLOT={{.Task.Slot}}
       - FAAS_GO_MAX_PROC_FACTOR=8
       - GOGC=1000
     depends_on:
@@ -171,7 +171,7 @@ services:
     volumes:
       - /mnt/inmem/nightcore:/tmp/nightcore
     environment:
-      - SWARM_TASK_SLOT=1
+      - SWARM_TASK_SLOT={{.Task.Slot}}
       - FAAS_GO_MAX_PROC_FACTOR=8
       - GOGC=1000
     depends_on:
